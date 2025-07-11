@@ -6,10 +6,41 @@ const ScheduleManager = () => {
     const [popupType, setPopupType] = useState(null);
     const [schedules, setSchedules] = useState([]);
     const [editItem, setEditItem] = useState(null);
+    // =========================================================================================
+    // handle function for saving the data in database
+    const handleSaveAllToDB = async () => {
+        const dataToSave = schedules.filter((item) => item.day === selectDay);
+        if (dataToSave.length === 0) {
+            alert("No data to save for the selected day.");
+            return;
+        }
 
+        try {
+            const response = await fetch(
+                "http://localhost:5000/api/schedules",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(dataToSave),
+                }
+            );
+
+            if (response.ok) {
+                alert(" saved successfully!");
+            } else {
+                alert(" Failed to save .");
+            }
+        } catch (error) {
+            console.error("Error saving schedules:", error);
+            alert("Something went wrong.");
+        }
+    };
+    /////////////////////////////////////////////////////////////////////////////////////////////
     const formatTime = (time) => {
         if (!time) return "";
-        const [hours, minutes] = time.split(":" ).map(Number);
+        const [hours, minutes] = time.split(":").map(Number);
         const ampm = hours >= 12 ? "PM" : "AM";
         const hours12 = hours % 12 || 12;
         return `${hours12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
@@ -76,10 +107,16 @@ const ScheduleManager = () => {
                     {timeTill && `Selected: ${formatTime(timeTill)}`}
                 </p>
                 <div className="flex justify-end mt-2 gap-2">
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-1 rounded">
+                    <button
+                        onClick={handleSubmit}
+                        className="bg-blue-500 text-white px-4 py-1 rounded"
+                    >
                         {initialData.id ? "Update" : "Submit"}
                     </button>
-                    <button onClick={onClose} className="bg-gray-500 text-white px-4 py-1 rounded">
+                    <button
+                        onClick={onClose}
+                        className="bg-gray-500 text-white px-4 py-1 rounded"
+                    >
                         Cancel
                     </button>
                 </div>
@@ -88,7 +125,9 @@ const ScheduleManager = () => {
     };
 
     const IntervalPopup = ({ onClose, onSubmit, initialData = {} }) => {
-        const [intervalType, setIntervalType] = useState(initialData.subject || "");
+        const [intervalType, setIntervalType] = useState(
+            initialData.subject || ""
+        );
         const [timeFrom, setTimeFrom] = useState(initialData.timeFrom || "");
         const [timeTill, setTimeTill] = useState(initialData.timeTill || "");
 
@@ -139,10 +178,16 @@ const ScheduleManager = () => {
                     {timeTill && `Selected: ${formatTime(timeTill)}`}
                 </p>
                 <div className="flex justify-end mt-2 gap-2">
-                    <button onClick={handleSubmit} className="bg-blue-500 text-white px-4 py-1 rounded">
+                    <button
+                        onClick={handleSubmit}
+                        className="bg-blue-500 text-white px-4 py-1 rounded"
+                    >
                         {initialData.id ? "Update" : "Submit"}
                     </button>
-                    <button onClick={onClose} className="bg-gray-500 text-white px-4 py-1 rounded">
+                    <button
+                        onClick={onClose}
+                        className="bg-gray-500 text-white px-4 py-1 rounded"
+                    >
                         Cancel
                     </button>
                 </div>
@@ -192,7 +237,7 @@ const ScheduleManager = () => {
                         <tr className="bg-purple-200 text-left">
                             <th className="border p-2">Name</th>
                             <th className="border p-2">From</th>
-                            <th className="border p-2">Till</th>
+                            <th className="border p-2">To</th>
                             <th className="border p-2 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -200,8 +245,12 @@ const ScheduleManager = () => {
                         {filtered.map((item) => (
                             <tr key={item.id} className="hover:bg-gray-50">
                                 <td className="border p-2">{item.subject}</td>
-                                <td className="border p-2">{formatTime(item.timeFrom)}</td>
-                                <td className="border p-2">{formatTime(item.timeTill)}</td>
+                                <td className="border p-2">
+                                    {formatTime(item.timeFrom)}
+                                </td>
+                                <td className="border p-2">
+                                    {formatTime(item.timeTill)}
+                                </td>
                                 <td className="border p-2 flex gap-2 justify-center">
                                     <button
                                         onClick={() => {
@@ -216,7 +265,10 @@ const ScheduleManager = () => {
                                     <button
                                         onClick={() => {
                                             setSchedules((prev) =>
-                                                prev.filter((entry) => entry.id !== item.id)
+                                                prev.filter(
+                                                    (entry) =>
+                                                        entry.id !== item.id
+                                                )
                                             );
                                         }}
                                         className="bg-red-500 text-white px-3 py-1 rounded text-xs"
@@ -228,7 +280,10 @@ const ScheduleManager = () => {
                         ))}
                         {filtered.length === 0 && (
                             <tr>
-                                <td colSpan="4" className="text-center text-gray-500 p-4">
+                                <td
+                                    colSpan="4"
+                                    className="text-center text-gray-500 p-4"
+                                >
                                     No schedule added yet.
                                 </td>
                             </tr>
@@ -241,12 +296,15 @@ const ScheduleManager = () => {
 
     return (
         <div className="p-6 w-full max-w-6xl mx-auto border-2">
-            <h1 className="text-4xl text-blue-800 text-center mb-4 border-b pb-2">
+            <h1 className="text-4xl text-blue-800 text-center mb-4 border-b pb-2  shadow-gray-300 shadow-2xl">
                 WELCOME TO TIME TABLE
             </h1>
-            <div className="flex flex-col md:flex-row gap-6 min-h-[400px]">
-                <div className="md:w-1/2 w-full bg-white p-6 rounded shadow">
-                    <DayDropdown selectedDay={selectDay} setSelectDay={setSelectDay} />
+            <div className="flex flex-col md:flex-row gap-6 min-h-[400px] ">
+                <div className="md:w-1/2 w-full bg-white p-6 rounded  shadow-gray-300 shadow-2xl">
+                    <DayDropdown
+                        selectedDay={selectDay}
+                        setSelectDay={setSelectDay}
+                    />
                     <button
                         onClick={() => {
                             setPopupType("period");
@@ -291,7 +349,25 @@ const ScheduleManager = () => {
                     )}
                 </div>
             </div>
+
             <ScheduleTable />
+            <div className="mt-10 flex justify-center">
+                <button
+                    onClick={handleSaveAllToDB}
+                    disabled={
+                        schedules.filter((item) => item.day === selectDay)
+                            .length === 0
+                    }
+                    className={`px-6 py-3 text-lg rounded shadow-md transition duration-300
+            ${
+                schedules.filter((item) => item.day === selectDay).length === 0
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-green-600 hover:bg-green-700 text-white"
+            }`}
+                >
+                    Save All to Database
+                </button>
+            </div>
         </div>
     );
 };
